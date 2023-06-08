@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    #solar-panel {
+      width: 800px;
+      height: 750px;
+      background-color: rgb(157, 157, 255);
+      position: relative;
+      margin-bottom: 20px;
+    }
+    
+    .particle {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background-color: red;
+      position: absolute;
+    }
+    
+    #particle-count {
+      position: absolute;
+      top: 0;
+      right: 0;
+      padding: 10px;
+      background-color: white;
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+    }
+    
+    #area {
+      position: absolute;
+      top: 30px;
+      right: 0;
+      padding: 10px;
+      background-color: white;
+      font-family: Arial, sans-serif;
+      font-size: 16px;
+    }
+    
+    @media only screen and (max-width: 800px) {
+      #solar-panel {
+        width: 100%;
+        height: auto;
+        max-height: 750px;
+      }
+    }
+    
+    @media only screen and (max-width: 600px) {
+      #solar-panel {
+        max-height: 500px;
+      }
+    }
+    
+    @media only screen and (max-width: 400px) {
+      #solar-panel {
+        max-height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Solar Panel Dust Simulation</h1>
+  <div id="solar-panel"></div>
+  <div id="particle-count">Particle Count: 0</div>
+  <div id="area">Occupied Area: 0 square pixels</div>
+
+  <script>
+    const solarPanel = document.getElementById('solar-panel');
+    const panelWidth = solarPanel.offsetWidth;
+    const panelHeight = solarPanel.offsetHeight;
+    const particleSize = 3;
+    const particles = [];
+    const particleCountElement = document.getElementById('particle-count');
+    const areaElement = document.getElementById('area');
+    let particleCount = 0;
+
+    function createParticle() {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+
+      const newPosition = getRandomPosition();
+
+      particle.style.left = newPosition.x + 'px';
+      particle.style.top = newPosition.y + 'px';
+
+      solarPanel.appendChild(particle);
+
+      particles.push(particle);
+      particleCount += 1000;
+      particleCountElement.textContent = 'Particle Count: ' + particleCount;
+      updateOccupiedArea();
+    }
+
+    function getRandomPosition() {
+      let x = Math.random() * (panelWidth - particleSize);
+      let y = Math.random() * (panelHeight - particleSize);
+
+      return { x, y };
+    }
+
+    function updateParticles() {
+      particles.forEach((particle) => {
+        const newX = Math.random() * (panelWidth - particleSize);
+        const newY = Math.random() * (panelHeight - particleSize);
+
+        particle.style.left = newX + 'px';
+        particle.style.top = newY + 'px';
+      });
+      updateOccupiedArea();
+    }
+
+    function updateOccupiedArea() {
+      const occupiedArea = particleCount * Math.pow(particleSize, 2);
+      const remainingArea = 800 * 750 * 20 - occupiedArea;
+      const percentageAreaCovered = (occupiedArea / remainingArea * 100).toFixed(2);
+      areaElement.textContent = 'Occupied Area: ' + occupiedArea + ' square pixels, Remaining area: ' + remainingArea + ' square pixels, Percentage area covered = ' + percentageAreaCovered + '%';
+    }
+
+    setInterval(() => {
+      for (let i = 0; i < 1; i++) {
+        createParticle();
+      }
+    }, 200);
+
+    setInterval(updateParticles, 50);
+  </script>
+</body>
+</html>
