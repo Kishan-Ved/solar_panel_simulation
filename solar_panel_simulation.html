@@ -1,129 +1,208 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <style>
-    #solar-panel {
-      width: 800px;
-      height: 750px;
-      background-color: rgb(157, 157, 255);
-      position: relative;
-      margin-bottom: 20px;
-    }
-    
-    .particle {
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background-color: red;
-      position: absolute;
-    }
-    
-    #particle-count {
-      position: absolute;
-      top: 0;
-      right: 0;
-      padding: 10px;
-      background-color: white;
-      font-family: Arial, sans-serif;
-      font-size: 16px;
-    }
-    
-    #area {
-      position: absolute;
-      top: 30px;
-      right: 0;
-      padding: 10px;
-      background-color: white;
-      font-family: Arial, sans-serif;
-      font-size: 16px;
-    }
-    
-    @media only screen and (max-width: 800px) {
-      #solar-panel {
-        width: 100%;
-        height: auto;
-        max-height: 750px;
-      }
-    }
-    
-    @media only screen and (max-width: 600px) {
-      #solar-panel {
-        max-height: 500px;
-      }
-    }
-    
-    @media only screen and (max-width: 400px) {
-      #solar-panel {
-        max-height: 300px;
-      }
-    }
-  </style>
+    <meta charset="utf-8">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        #solar-panel {
+            width: 800px;
+            height: auto;
+            background-color: rgba(45, 130, 233, 0.575);
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .particle {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background-color: red;
+            position: absolute;
+        }
+
+        .card {
+            width: 200px;
+            padding: 10px;
+            background-color: rgba(157, 214, 255, 0.432);
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .footer {
+            background-color: #f3f3f3;
+        }
+
+        .blink {
+            animation: blinker 1s linear infinite;
+        }
+
+        @keyframes blinker {
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .card .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            margin-bottom: 6px;
+        }
+
+        .card .progress-bar .progress {
+            height: 100%;
+            border-radius: 4px;
+            background-color: #10b981;
+            transition: width 0.3s;
+        }
+
+        .card .progress-bar .percentage {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #4b5563;
+        }
+
+        body {
+            background: linear-gradient(to bottom right, #34d399, #60a5fa, #9333ea, #f59e0b, #10b981, #ec4899);
+        }
+    </style>
 </head>
-<body>
-  <h1>Solar Panel Dust Simulation</h1>
-  <div id="solar-panel"></div>
-  <div id="particle-count">Particle Count: 0</div>
-  <div id="area">Occupied Area: 0 square pixels</div>
 
-  <script>
-    const solarPanel = document.getElementById('solar-panel');
-    const panelWidth = solarPanel.offsetWidth;
-    const panelHeight = solarPanel.offsetHeight;
-    const particleSize = 3;
-    const particles = [];
-    const particleCountElement = document.getElementById('particle-count');
-    const areaElement = document.getElementById('area');
-    let particleCount = 0;
+<body class="bg-gradient-to-r from-green-200 to-blue-100">
+    <header class="p-4 bg-gray-800 text-white flex items-center justify-between">
+        <h1 class="text-2xl font-bold">
+            Solar Panel Dust Simulation
+            <span id="alert" class="ml-2 text-red-500"></span>
+        </h1>
+        <button id="reset-button"
+            class="p-2 bg-gradient-to-r from-green-400 to-green-600 text-white rounded">Reset</button>
+    </header>
+    <div class="flex">
+        <div id="solar-panel"></div>
+        <div class="text-lg p-4 space-y-4">
+            <div class="card">
+                <h2 class="text-xl font-bold text-gray-800 mb-2">Particle Count</h2>
+                <p id="particle-count" class="text-gray-600">0</p>
+            </div>
+            <div class="card">
+                <h2 class="text-xl font-bold text-gray-800 mb-2">Occupied Area</h2>
+                <p id="area" class="text-gray-600">0 square pixels</p>
+            </div>
+            <div class="card">
+                <h2 class="text-xl font-bold text-gray-800 mb-2">Remaining Area</h2>
+                <p id="area-left" class="text-gray-600">1200000 square pixels</p>
+            </div>
+            <div class="card">
+                <h2 class="text-xl font-bold text-gray-800 mb-2">Percentage Area Covered</h2>
+                <div class="progress-bar">
+                    <div class="progress" id="progress"></div>
+                </div>
+                <p id="percentage-covered" class="text-gray-600">0%</p>
+            </div>
+            <div class="card">
+                <h2 class="text-xl font-bold text-gray-800 mb-2">Time Covered</h2>
+                <div id="time-covered" class="flex items-center">
+                    <svg class="w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"></path>
+                        <circle cx="12" cy="12" r="10"></circle>
+                    </svg>
+                    <p id="time-covered-value" class="text-gray-600">0%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="p-4 bg-gray-800 text-white text-center">
+        &copy; 2023 Self-Solar Sweep. All rights reserved.
+    </footer>
 
-    function createParticle() {
-      const particle = document.createElement('div');
-      particle.className = 'particle';
+    <script>
+        const solarPanel = document.getElementById('solar-panel');
+        const panelWidth = solarPanel.offsetWidth;
+        const panelHeight = solarPanel.offsetHeight;
+        const particleSize = 3;
+        const particles = [];
+        const particleCountElement = document.getElementById('particle-count');
+        const areaElement = document.getElementById('area');
+        const alertElement = document.getElementById('alert');
+        const areaLeftElement = document.getElementById('area-left');
+        const percentageCoveredElement = document.getElementById('percentage-covered');
+        const timeCoveredElement = document.getElementById('time-covered-value');
+        const progressBar = document.getElementById('progress');
 
-      const newPosition = getRandomPosition();
+        let particleCount = 0;
 
-      particle.style.left = newPosition.x + 'px';
-      particle.style.top = newPosition.y + 'px';
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
 
-      solarPanel.appendChild(particle);
+            const newPosition = getRandomPosition();
 
-      particles.push(particle);
-      particleCount += 1000;
-      particleCountElement.textContent = 'Particle Count: ' + particleCount;
-      updateOccupiedArea();
-    }
+            particle.style.left = newPosition.x + 'px';
+            particle.style.top = newPosition.y + 'px';
 
-    function getRandomPosition() {
-      let x = Math.random() * (panelWidth - particleSize);
-      let y = Math.random() * (panelHeight - particleSize);
+            solarPanel.appendChild(particle);
 
-      return { x, y };
-    }
+            particles.push(particle);
+            particleCount += 1000;
+            particleCountElement.textContent = particleCount.toString();
+            updateOccupiedArea();
+        }
 
-    function updateParticles() {
-      particles.forEach((particle) => {
-        const newX = Math.random() * (panelWidth - particleSize);
-        const newY = Math.random() * (panelHeight - particleSize);
+        function getRandomPosition() {
+            let x = Math.random() * (panelWidth - particleSize);
+            let y = Math.random() * (panelHeight - particleSize);
 
-        particle.style.left = newX + 'px';
-        particle.style.top = newY + 'px';
-      });
-      updateOccupiedArea();
-    }
+            return { x, y };
+        }
 
-    function updateOccupiedArea() {
-      const occupiedArea = particleCount * Math.pow(particleSize, 2);
-      const remainingArea = 800 * 750 * 20 - occupiedArea;
-      const percentageAreaCovered = (occupiedArea / remainingArea * 100).toFixed(2);
-      areaElement.textContent = 'Occupied Area: ' + occupiedArea + ' square pixels, Remaining area: ' + remainingArea + ' square pixels, Percentage area covered = ' + percentageAreaCovered + '%';
-    }
+        function updateParticles() {
+            particles.forEach((particle) => {
+                const newX = Math.random() * (panelWidth - particleSize);
+                const newY = Math.random() * (panelHeight - particleSize);
 
-    setInterval(() => {
-      for (let i = 0; i < 1; i++) {
-        createParticle();
-      }
-    }, 200);
+                particle.style.left = newX + 'px';
+                particle.style.top = newY + 'px';
+            });
+            updateOccupiedArea();
+        }
 
-    setInterval(updateParticles, 50);
-  </script>
+        function updateOccupiedArea() {
+            const occupiedArea = particleCount * Math.pow(particleSize, 2);
+            const remainingArea = 800 * 750 * 20 - occupiedArea;
+            const percentageAreaCovered = ((occupiedArea / (occupiedArea + remainingArea)) * 100).toFixed(2);
+            areaElement.textContent = occupiedArea.toString() + ' square pixels';
+            areaLeftElement.textContent = remainingArea + ' square pixels';
+            percentageCoveredElement.textContent = percentageAreaCovered + '%';
+            progressBar.style.width = percentageAreaCovered + '%';
+            timeCoveredElement.textContent = (percentageAreaCovered * 3).toFixed(0) + ' days';
+            const alertMessage = 'Percentage area covered: ' + percentageAreaCovered + '%';
+            alertElement.textContent = '';
+            if (percentageAreaCovered > 50) {
+                alertElement.textContent = alertMessage;
+                alertElement.classList.add('blink');
+            } else {
+                alertElement.classList.remove('blink');
+            }
+        }
+
+        const resetButton = document.getElementById('reset-button');
+
+        resetButton.addEventListener('click', function () {
+            location.reload();
+        });
+
+        setInterval(() => {
+            for (let i = 0; i < 1; i++) {
+                createParticle();
+            }
+        }, 200);
+
+        setInterval(updateParticles, 50);
+    </script>
 </body>
+
 </html>
